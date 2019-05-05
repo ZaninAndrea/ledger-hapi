@@ -9,8 +9,8 @@ async function main() {
         newUser,
         closeDebt,
         newExpense,
-        addDebt,
         getUserDebts,
+        getUserLedger,
     } = mongoHelpers({
         Debt,
         User,
@@ -44,6 +44,13 @@ async function main() {
         path: "/users/{userId}/debts",
         handler: async (request, h) => {
             return await getUserDebts(request.params.userId)
+        },
+    })
+    server.route({
+        method: "GET",
+        path: "/users/{userId}/ledger",
+        handler: async (request, h) => {
+            return await getUserLedger(request.params.userId)
         },
     })
     server.route({

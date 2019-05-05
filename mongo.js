@@ -63,7 +63,7 @@ module.exports = ({ Debt, User, Ledger }) => {
 
     async function getUserDebts(userId) {
         const users = await User.findAll({})
-        const getDebteeName = id => {
+        const getName = id => {
             const usersFound = users.filter(
                 user => user._id.toString() === id.toString()
             )
@@ -88,7 +88,41 @@ module.exports = ({ Debt, User, Ledger }) => {
 
         return [...fromDebts, ...toDebts].map(debt => ({
             ...debt,
-            debteeName: getDebteeName(debt.debtee),
+            debtor: { _id: debt.debtor, name: getName(debt.debtor) },
+            debtee: { _id: debt.debtee, name: getName(debt.debtee) },
+        }))
+    }
+
+    async function getUserLedger(userId) {
+        const users = await User.findAll({})
+        const getName = id => {
+            const usersFound = users.filter(
+                user => user._id.toString() === id.toString()
+            )
+
+            if (usersFound.length !== 0) return usersFound[0].name
+            else return null
+        }
+
+        const spenderLedger = (await Ledger.findAll({
+            $or: [
+                { spender: userId },
+                { beneficiaries: { $elemMatch: { $eq: userId } } },
+            ],
+        })).map(({ amount, description, spender, beneficiaries }) => ({
+            amount,
+            description,
+            spender,
+            beneficiaries,
+        }))
+
+        return spenderLedger.map(ledger => ({
+            ...ledger,
+            spender: { _id: ledger.spender, name: getName(ledger.spender) },
+            beneficiaries: ledger.beneficiaries.map(user => ({
+                _id: user,
+                name: getName(user),
+            })),
         }))
     }
 
@@ -98,5 +132,6 @@ module.exports = ({ Debt, User, Ledger }) => {
         newExpense,
         addDebt,
         getUserDebts,
+        getUserLedger,
     }
 }
