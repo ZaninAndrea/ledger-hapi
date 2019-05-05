@@ -18,18 +18,50 @@ module.exports = ({ Debt, User, Ledger }) => {
         return newUserId
     }
     async function closeDebt(debtor, debtee) {
-        const p1 = Debt.updateOne(
+        const findPromise1 = Debt.findOne(
             { debtor: ObjectID(debtor), debtee: ObjectID(debtee) },
             { $set: { amount: 0 } }
         )
-        const p2 = Debt.updateOne(
+        const findPromise2 = Debt.findOne(
             { debtee: ObjectID(debtor), debtor: ObjectID(debtee) },
             { $set: { amount: 0 } }
         )
+        const debtFound = (await Promise.all([
+            findPromise1,
+            findPromise2,
+        ])).reduce((acc, curr) => acc || curr, null)
 
-        console.log(await Promise.all([p1, p2]))
+        if (debtFound !== null) {
+            const updatePromise1 = Debt.updateOne(
+                { debtor: ObjectID(debtor), debtee: ObjectID(debtee) },
+                { $set: { amount: 0 } }
+            )
+            const updatePromise2 = Debt.updateOne(
+                { debtee: ObjectID(debtor), debtor: ObjectID(debtee) },
+                { $set: { amount: 0 } }
+            )
 
-        return true
+            await Promise.all([updatePromise1, updatePromise2])
+            if (debtFound.amount > 0) {
+                await newExpense(
+                    debtFound.amount,
+                    "Debt pay off",
+                    debtFound.debtor.toString(),
+                    [debtFound.debtee.toString()]
+                )
+            } else {
+                await newExpense(
+                    -debtFound.amount,
+                    "Debt pay off",
+                    debtFound.debtee.toString(),
+                    [debtFound.debtor.toString()]
+                )
+            }
+
+            return true
+        } else {
+            return false
+        }
     }
     async function newExpense(amount, description, spender, beneficiaries) {
         deltaDebt = amount / beneficiaries.length

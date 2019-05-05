@@ -57,7 +57,6 @@ async function main() {
         method: "DELETE",
         path: "/users/{debtorId}/debts/{debteeId}",
         handler: async (request, h) => {
-            console.log("called delete")
             return await closeDebt(
                 request.params.debtorId,
                 request.params.debteeId
