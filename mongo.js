@@ -43,14 +43,14 @@ module.exports = ({ Debt, User, Ledger }) => {
 
             await Promise.all([updatePromise1, updatePromise2])
             if (debtFound.amount > 0) {
-                await newExpense(
+                await Ledger.insertOne(
                     debtFound.amount,
                     "Debt pay off",
                     debtFound.debtor.toString(),
                     [debtFound.debtee.toString()]
                 )
             } else {
-                await newExpense(
+                await Ledger.insertOne(
                     -debtFound.amount,
                     "Debt pay off",
                     debtFound.debtee.toString(),
