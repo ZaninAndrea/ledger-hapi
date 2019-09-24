@@ -55,9 +55,9 @@ function collectionToHandler(collection) {
 module.exports = new Promise((resolve, reject) => {
     client.connect(err => {
         if (err) return reject(err)
-        const debtsCollection = client.db("test").collection("debts")
-        const usersCollection = client.db("test").collection("users")
-        const ledgerCollection = client.db("test").collection("ledger")
+        const debtsCollection = client.db("heroku_l56hs8nr").collection("debts")
+        const usersCollection = client.db("heroku_l56hs8nr").collection("users")
+        const ledgerCollection = client.db("heroku_l56hs8nr").collection("ledger")
 
         resolve({
             client,
