@@ -1,6 +1,6 @@
 const MongoClient = require("mongodb").MongoClient
 require("dotenv").config()
-const uri = process.env.URI
+const uri = process.env.MONGODB_URI
 
 const client = new MongoClient(uri, { useNewUrlParser: true })
 
